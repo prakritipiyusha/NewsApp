@@ -66,38 +66,37 @@ function displayNews() {
     return;
   }
 
-  const newsHTML = allNews.slice(currentNewsIndex, currentNewsIndex + newsLimit).map(article => {
-    const hasImage = article.image_url ? "has-image" : ""; // Check if an image URL exists
-    const imageUrl = article.image_url || ''; // Use image URL if available, otherwise leave it blank
-
+  const newsHTML = allNews.slice(currentNewsIndex, currentNewsIndex + newsLimit).map((article) => {
+    const hasImage = article.image_url ? "has-image" : "";
+    const imageUrl = article.image_url || '';
     return `
       <div class="newsCard ${hasImage}">
         <div class="imageWrapper">
           <img src="${imageUrl}" class="thumbnail" alt="News Image">
         </div>
         <div class="card-body">
-          <div class="card-date">${new Date(article.pubDate).toLocaleDateString()}</div>
           <h5 class="card-title">${article.title}</h5>
-          <h5 class="card-author">Author: ${article.creator || 'Unknown'}</h5>
           <p class="card-text">${article.description || 'No description available'}</p>
           <a target="_blank" href="${article.link}" class="btn btn-primary">Read more..</a>
+          <button class="btn btn-secondary" onclick="saveBookmark('${article.title}', '${article.description}', '${article.link}', '${imageUrl}')">
+            Save
+          </button>
         </div>
       </div>
     `;
   }).join('');
-  
+
   newsBox.innerHTML = newsHTML;
   newsBox.style.visibility = "visible";
-
-
 
   if (currentNewsIndex + newsLimit < allNews.length) {
     newsBox.innerHTML += `<button id="showMore" class="btn btn-primary">Show More</button>`;
     document.getElementById("showMore").addEventListener("click", showMoreNews);
   }
-
-  newsBox.style.visibility = "visible";
 }
+document.addEventListener('DOMContentLoaded', () => {
+  loadSavedNews();
+});
 
 // Fetch News by Category
 function sendCategory(id) {
@@ -191,4 +190,82 @@ function toggleChatbot() {
     initializeChatbot();
   }
 }
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      const splashScreen = document.getElementById("splashScreen");
+      splashScreen.style.opacity = "0"; // Fade out
+      splashScreen.style.transition = "opacity 0.5s ease";
+      setTimeout(() => splashScreen.style.display = "none", 500); // Remove after fade-out
+    }, 3000); // Show for 3 seconds
+  });
 
+        
+// Show or hide the scroll-to-top button based on scroll position
+window.addEventListener("scroll", () => {
+    console.log("Scroll event triggered"); // Debugging scroll
+    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    if (window.scrollY > 300) {
+      scrollToTopBtn.classList.add("show");
+    } else {
+      scrollToTopBtn.classList.remove("show");
+    }
+  });
+  
+  // Scroll to the top
+  function scrollToTop() {
+    console.log("Scroll to top button clicked"); // Debugging click
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  
+  // Attach click event listener
+  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+  if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener("click", scrollToTop);
+  } else {
+    console.error("Scroll to Top Button not found in DOM");
+  }
+  function saveBookmark(title, description, link, imageUrl) {
+    // Retrieve existing bookmarks from localStorage
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    
+    // Create a bookmark object
+    const bookmark = { title, description, link, imageUrl };
+  
+    // Avoid duplicate bookmarks
+    if (!bookmarks.some((item) => item.link === link)) {
+      bookmarks.push(bookmark);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      alert('News bookmarked successfully!');
+      loadSavedNews(); // Refresh saved section
+    } else {
+      alert('This news is already bookmarked!');
+    }
+  }
+  function loadSavedNews() {
+    const savedNewsContainer = document.getElementById('savedNews');
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    
+    // If no bookmarks, display a message
+    if (bookmarks.length === 0) {
+      savedNewsContainer.innerHTML = '<p>No saved news articles yet.</p>';
+      return;
+    }
+  
+    // Generate HTML for saved news
+    const savedHTML = bookmarks.map(({ title, description, link, imageUrl }) => `
+      <div class="newsCard">
+        <div class="imageWrapper">
+          <img src="${imageUrl || ''}" class="thumbnail" alt="News Image">
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">${title}</h5>
+          <p class="card-text">${description || 'No description available'}</p>
+          <a target="_blank" href="${link}" class="btn btn-primary">Read more..</a>
+        </div>
+      </div>
+    `).join('');
+    
+    savedNewsContainer.innerHTML = savedHTML;
+  }
+  
+  

@@ -1,9 +1,11 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const API_TOKEN = process.env.NEWS_API_TOKEN;
 
